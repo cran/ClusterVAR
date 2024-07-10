@@ -83,7 +83,8 @@ LCVAR <- function(Data,
 
 
   # Remove rows with NA values
-  Data <- Data[stats::complete.cases(Data), ]
+    Data <- Data[stats::complete.cases(Data[, c(yVars, Beep, Day, ID, xFactor, xContinuous)]), ]
+
   ##### Preprocessing of Data Set #####--------------------
   Data = as.data.frame(Data)
   if(is.null(Day)){

@@ -5,6 +5,8 @@ numberPredictableObservations <- function(Data,
                                           Beep,
                                           Day = NULL,
                                           ID,
+                                          xContinuous = NULL,
+                                          xFactor = NULL,
                                           Lags,
                                           ...)
     # If each measurement is done on the same day, don't specify day but only specify beep.
@@ -14,7 +16,6 @@ numberPredictableObservations <- function(Data,
     # ------ Computing Some Aux Vars ------
     LowestLag = min(Lags)
     HighestLag = max(Lags)
-
 
     # ------ Input Checks ------
     # Cluster Search Sequence
@@ -46,7 +47,9 @@ numberPredictableObservations <- function(Data,
 
 
     # Remove rows with NA values
-    Data <- Data[stats::complete.cases(Data),]
+    Data <- Data[stats::complete.cases(Data[, c(yVars, Beep, Day, ID, xFactor, xContinuous)]), ]
+
+
     ##### Preprocessing of Data Set #####--------------------
     Data = as.data.frame(Data)
     if (is.null(Day)) {
@@ -126,7 +129,6 @@ numberPredictableObservations <- function(Data,
 
     }
 
-
     FunctionOutput = data.frame(matrix(NA, nrow = HighestLag, ncol = 1),
                                 row.names = apply(as.matrix(1:HighestLag), 1, function(x) paste(c(x, "Lag"), collapse = " ")))
     colnames(FunctionOutput) = c("Total predictable observations")
@@ -136,8 +138,21 @@ numberPredictableObservations <- function(Data,
         FunctionOutput[lagRunner, ] = sum(Tni_NPred[[lagRunner]])
     }
     FunctionOutput = FunctionOutput[LowestLag:HighestLag, , drop = FALSE]
-    #class(FunctionOutput) <- c("ClusterVARNumberPredictable", class(FunctionOutput))
 
-    return(FunctionOutput)
+    names(Tni_NPred) = apply(as.matrix(1:HighestLag), 1, function(x) paste(c(x, "Lag"), collapse = " "))
+
+    for (lagRunner in LowestLag:HighestLag)
+    {
+      Tni_NPred[[lagRunner]] = data.frame(pers, Tni_NPred[[lagRunner]])
+      colnames(Tni_NPred[[lagRunner]]) = c("ID", "Predictable observations")
+    }
+
+
+    OutList = list(Tni_NPred, FunctionOutput)
+    names(OutList) = c("Predictable observations per subject", "Total predictable observations")
+
+    class(OutList) <- c("PredictableObs", class(OutList))
+
+    return(OutList)
 
 }
