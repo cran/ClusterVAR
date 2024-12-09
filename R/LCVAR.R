@@ -11,7 +11,7 @@ LCVAR <- function(Data,
                   Lags,
                   Center = FALSE,
                   smallestClN = 3,
-                  Cores = 1,
+                  Cores = 2,
                   RndSeed = NULL,
                   Rand = 50,
                   Rational = TRUE,
@@ -201,13 +201,6 @@ LCVAR <- function(Data,
     for (i in 1:N) {
       NewPredictableObsSmall[[i]] = c(intersect(PredictableObs[[lagRunner]], c(PersStart[i]:PersEnd[i])))
       LaggedPredictObsSmall[[i]]  = unlist(GetSequences(NewPredictableObsSmall[[i]], lagRunner))
-      if(!is.null(xFactor)){
-        #check that all Dummies have at least 1 observation per person
-        if(NumbCategoricalDummies == 2){
-
-        }else{ stopifnot( all(rowSums(XUsedForCheck[ , c( NewPredictableObsSmall[[i]] , LaggedPredictObsSmall[[i]])]) >= 1)) }
-
-      }
     }
     NewPredictableObs[[lagRunner]] = NewPredictableObsSmall
     LaggedPredictObs[[lagRunner]] = LaggedPredictObsSmall
@@ -220,17 +213,25 @@ LCVAR <- function(Data,
     if (NumbCategoricalDummies == 2) {
       for (lagRunner in LowestLag:HighestLag) {
         for (i in 1:N){
-          stopifnot(sum(XUsedForCheck[, c(NewPredictableObs[[lagRunner]][[i]] , LaggedPredictObs[[lagRunner]][[i]])]) >= 1)
+          if( !(sum(XUsedForCheck[, c(NewPredictableObs[[lagRunner]][[i]] , LaggedPredictObs[[lagRunner]][[i]])]) >= 1)){
+            stop("At least one subject has no predictable time-points at one level of your categorical exogenous variable. Remove subjects who have not enough observations from your dataframe.")
+          }
         }
       }
     } else{
       for (lagRunner in LowestLag:HighestLag) {
         for (i in 1:N){
-          stopifnot(all(rowSums(XUsedForCheck[, c(NewPredictableObs[[lagRunner]][[i]] , LaggedPredictObs[[lagRunner]][[i]])]) >= 1))
+          if( !(all(rowSums(XUsedForCheck[, c(NewPredictableObs[[lagRunner]][[i]] , LaggedPredictObs[[lagRunner]][[i]])]) >= 1))){
+            stop("At least one subject has no predictable time-points at one level of your categorical exogenous variable. Remove subjects who have not enough observations from your dataframe.")
+          }
         }
       }
     }
   }
+
+  checkVarianceY(Y = Y, NewPredictableObs = NewPredictableObs, N = N, HighestLag = HighestLag, pers = pers)
+
+
   # Create val.init, a list containing memb, a vector ordered by ID that contains the cluster membership initialization ----
   if ( ! is.null(Initialization))
   {

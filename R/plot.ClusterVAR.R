@@ -1,5 +1,11 @@
 
-plot.ClusterVAR <- function(x, show,Number_of_Clusters = NULL, Number_of_Lags = NULL, Model = NULL, ...) {
+plot.ClusterVAR <- function(x,
+                            show,
+                            Number_of_Clusters = NULL,
+                            Number_of_Lags = NULL,
+                            Model = NULL,
+                            mar_heat = c(2.5,2.5,2,1),
+                            ...) {
 
   # ----- Fill in defaults ------
   args <- list(...)
@@ -38,7 +44,7 @@ plot.ClusterVAR <- function(x, show,Number_of_Clusters = NULL, Number_of_Lags = 
 
   # Ensure graphics settings are restored after calling function
   oldpar <- par(no.readonly = TRUE) # code line i
-  on.exit(par(oldpar)) # code line i + 1
+  # print(oldpar$mar)
 
   # ----- Plotting: Best-per-number-of-clusters ------
 
@@ -87,7 +93,7 @@ plot.ClusterVAR <- function(x, show,Number_of_Clusters = NULL, Number_of_Lags = 
     graphics::plot.window(xlim=c(1,N_L), ylim=yrange)
     graphics::axis(1, labels = labels, at=1:N_L)
     graphics::axis(2, labels=round(seq(yrange[1], yrange[2], length=8), 4),
-         at=seq(yrange[1], yrange[2], length=8), las=2)
+                   at=seq(yrange[1], yrange[2], length=8), las=2)
     title(xlab="Lag-Combinations")
     title(ylab="Information Criterion", line=4.5)
     title(paste0("Lags Combinations for ", Number_of_Clusters, " Clusters"), font.main=1)
@@ -134,8 +140,8 @@ plot.ClusterVAR <- function(x, show,Number_of_Clusters = NULL, Number_of_Lags = 
 
     # Legend
     graphics::legend("topright", legend=c("ICL", "BIC"),
-           lty=1, col=cols[1:2], text.col=cols[1:2],
-           bty="n", cex=1.2, pch=c(19, 17))
+                     lty=1, col=cols[1:2], text.col=cols[1:2],
+                     bty="n", cex=1.2, pch=c(19, 17))
 
   } # end if
 
@@ -164,6 +170,16 @@ plot.ClusterVAR <- function(x, show,Number_of_Clusters = NULL, Number_of_Lags = 
     }
 
     # browser()
+    #
+    # graphics::par(mfrow=c(1,2))
+    # graphics::par(mar=c(2.5,2.5,2,1))
+    # graphics::plot.new()
+    # graphics::plot.window(xlim=c(0,1), ylim=c(0, 1))
+    # box()
+    # graphics::plot.new()
+    # graphics::plot.window(xlim=c(0,1), ylim=c(0, 1))
+    # box()
+    # browser()
 
     # Loop over clusters & plot
     for(k in 1:K) plotHeat(phi = l_phi[[k]],
@@ -171,7 +187,8 @@ plot.ClusterVAR <- function(x, show,Number_of_Clusters = NULL, Number_of_Lags = 
                            main = paste0("Cluster ", k),
                            labels = labels,
                            cex.axis = cex.axis,
-                           cex.val = cex.val)
+                           cex.val = cex.val, mar = mar_heat)
+
 
   } # end if
 
@@ -193,8 +210,8 @@ plot.ClusterVAR <- function(x, show,Number_of_Clusters = NULL, Number_of_Lags = 
     lmat <- rbind(1:(K-1), lmat)
     lmat <- cbind(c(0, K:(2*(K-1))), lmat)
     graphics::layout(mat=lmat,
-           widths = c(0.2, rep(1, K-1)),
-           heights =  c(0.2, rep(1, K-1)))
+                     widths = c(0.2, rep(1, K-1)),
+                     heights =  c(0.2, rep(1, K-1)))
 
     # Plot Labels
     plotLabel <- function(x, srt=0, col="black",
@@ -227,6 +244,8 @@ plot.ClusterVAR <- function(x, show,Number_of_Clusters = NULL, Number_of_Lags = 
 
 
   } # end if
+
+  on.exit(par(oldpar)) # code line i + 1
 
 
 } # eoF

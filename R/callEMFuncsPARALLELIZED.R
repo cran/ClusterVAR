@@ -106,6 +106,7 @@ callEMFuncs <- function(Clusters,
 
   # Show progress bar?
   parabar::set_option("progress_track", pbar)
+  #parabar::set_option("cores_minimum", 1)
 
   backend <- parabar::start_backend(cores = n_cores, cluster_type = "psock", backend_type = "async")
 
@@ -189,7 +190,6 @@ callEMFuncs <- function(Clusters,
                                    #### Random starts ###
                                    StartCounter = 0
                                    while (StartCounter != length(EMCallVec))
-                                     # ToDo: in all EMFunc IDNames is passed but not used
                                    {
 
                                      StartCounter = StartCounter + 1
